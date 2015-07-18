@@ -1,0 +1,62 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+sourceCompatibility = 1.7
+version = '0.1alpha'
+
+mainClassName = "drumseq.DrumSeq"
+sourceSets {
+    main {
+        java {
+            srcDir 'src/drumseq'
+        }
+        resources {
+            srcDir 'src/data'
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://clojars.org/repo" }
+    ivy {
+        url "http://beadsproject.net/downloads/"
+	layout 'pattern', {
+	    artifact "[module].[ext]"
+	}
+    }
+    flatDir {
+        dirs "$rootProject.projectDir/libs"
+    }
+}
+configurations {
+    beads
+}
+
+dependencies {
+    beads group: 'net.beadsproject', name: 'Beads_Processing', ext: 'zip'
+    compile 'org.processing:complete:2.2.1'
+    compile "controlp5:controlp5:2.2.4-SNAPSHOT"
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+task extractBeads(type: Copy) {
+    String s = configurations.beads.resolve()
+    s = s.replaceAll(~/[\[\]]/, "")
+     
+    ant.unzip(src: s, dest:'libs', overwrite:"true") {
+        patternset() {
+	    include( name: 'beads_processing/beads/library/*.jar' )
+	}
+	mapper(type:"flatten")
+    }
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
