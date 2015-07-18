@@ -53,6 +53,10 @@ task extractBeads(type: Copy) {
     }
 }
 
+task wrapper(type: Wrapper) {
+     scriptFile = 'DrumSeq'
+}
+
 uploadArchives {
     repositories {
        flatDir {
