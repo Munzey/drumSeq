@@ -36,8 +36,12 @@ configurations {
 
 dependencies {
     beads group: 'net.beadsproject', name: 'Beads_Processing', ext: 'zip'
-    //compile 'org.processing:complete:2.2.1'
-    compile 'org.processing:processing-complete:3.0a10'
+    compile 'org.processing:complete:2.2.1'
+    //compile 'org.processing:processing-complete:3.0a10'
+    /*
+     * although this is on mvncentral, its just a pom, it seems processing.org
+     * uses oss.sonatype.org to store their jars and it will just resolve to 2.2.1 anyway
+     */ 
     compile "controlp5:controlp5:2.2.4-SNAPSHOT"
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
