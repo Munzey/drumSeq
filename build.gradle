@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'application'
 
-sourceCompatibility = 1.7
+sourceCompatibility = 1.8
 version = '0.1alpha'
 
 mainClassName = "drumseq.DrumSeq"
@@ -36,7 +36,8 @@ configurations {
 
 dependencies {
     beads group: 'net.beadsproject', name: 'Beads_Processing', ext: 'zip'
-    compile 'org.processing:complete:2.2.1'
+    //compile 'org.processing:complete:2.2.1'
+    compile 'org.processing:processing-complete:3.0a10'
     compile "controlp5:controlp5:2.2.4-SNAPSHOT"
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
