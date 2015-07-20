@@ -21,12 +21,15 @@ public class SideButtonListener implements ControlListener {
     int selectedButton = theEvent.getId();
     if (parent.buttons[selectedButton].isOn()) {
       parent.prevButEvent = theEvent.getId();
-      parent.kickFontColor = parent.color(92, 190, 153);
+      parent.fontColors[selectedButton] = parent.colorMap.get(selectedButton);
+    }
+    else {
+      parent.fontColors[selectedButton] = parent.color(255);
     }
     for (int i = 0; i < parent.buttons.length; i++) {
       if (parent.buttons[i].isOn() && i != parent.prevButEvent) {
         parent.buttons[i].setOff();
-        parent.kickFontColor = parent.color(255);
+        parent.fontColors[i] = parent.color(255);
       }
     }
   }

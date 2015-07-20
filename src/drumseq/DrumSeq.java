@@ -29,7 +29,9 @@ public class DrumSeq extends PApplet {
   PShape playPause;
   PShape k,s,h,t;
   int kickFontColor = color(255);
-  //int kickFontColor = color(92, 190, 153);
+  int snareFontColor = color(255);
+  int[] fontColors = {kickFontColor, snareFontColor};
+  HashMap<Integer,Integer> colorMap = new HashMap<Integer,Integer>();
   
   //cp5 stuff  
   ControlP5 cp5;
@@ -53,7 +55,7 @@ public class DrumSeq extends PApplet {
   int currentTab = 0;
   int previousTab;
   int prevButEvent;
-  int lastOnSideButton; //last know side button to be on, MAY NOT BE ON
+  int lastOnSideButton; //last known side button to be on, MAY NOT BE ON
   HashMap<Integer,Integer> custMap = new HashMap<Integer,Integer>(); 
   
   //beads stuff
@@ -80,10 +82,10 @@ public class DrumSeq extends PApplet {
 	   */
 	  play = createShape();
 	  play.beginShape();
+	  play.strokeWeight((float)1.5);
+	  //play.strokeJoin(ROUND);
 	  play.noFill();
 	  play.stroke(255);
-	  play.strokeWeight(2);
-	  play.strokeJoin(ROUND);
 	  play.vertex(displayWidth/95, (int)(displayHeight/2.5));
 	  play.vertex(displayWidth/28, (int)(displayHeight/2.3));
 	  play.vertex(displayWidth/95, (int)(displayHeight/2.1));
@@ -91,10 +93,10 @@ public class DrumSeq extends PApplet {
 	  
 	  pause = createShape();
 	  pause.beginShape(LINES);
-	  pause.noFill();
+	  //pause.noFill();
+	  pause.strokeWeight((float)1.5);
+	  //pause.strokeJoin(ROUND);
     pause.stroke(255);
-    pause.strokeWeight(2);
-    //pause.strokeJoin(ROUND);
 	  pause.vertex(displayWidth/40, (int)(displayHeight/2.5));
 	  pause.vertex(displayWidth/40, (int)(displayHeight/2.1));
 	  pause.vertex(displayWidth/92, (int)(displayHeight/2.5));
@@ -102,27 +104,55 @@ public class DrumSeq extends PApplet {
 	  pause.endShape();
 	  
 	  k = createShape(GROUP);
-	  PShape s1 = createShape();
-	  s1.beginShape();
-	  s1.noFill();
-	  s1.stroke(kickFontColor);
-	  s1.strokeWeight(2);
-	  //s1.strokeJoin(ROUND);
-	  s1.vertex(displayWidth/45, (int)(displayHeight/22));
-	  s1.vertex(displayWidth/95, (int)(displayHeight/15));
-	  s1.vertex(displayWidth/35, (int)(displayHeight/10));
-	  s1.endShape();
-	  PShape s2 = createShape();
-	  s2.beginShape(LINES);
-	  s2.noFill();
-    s2.stroke(kickFontColor);
-    s2.strokeWeight(2);
-    s2.strokeJoin(ROUND);
-	  s2.vertex(displayWidth/95, (int)(displayHeight/25));
-	  s2.vertex(displayWidth/95, (int)(displayHeight/10));
-	  s2.endShape();
-	  k.addChild(s1);
-	  k.addChild(s2);
+	  PShape k1 = createShape();
+	  k1.beginShape();
+	  k1.noFill();
+	  k1.stroke(kickFontColor);
+	  k1.strokeWeight((float)1.5);
+	  k1.strokeJoin(ROUND);
+	  k1.vertex(displayWidth/45, (int)(displayHeight/22));
+	  k1.vertex(displayWidth/95, (int)(displayHeight/15));
+	  k1.vertex(displayWidth/35, (int)(displayHeight/10));
+	  k1.endShape();
+	  PShape k2 = createShape();
+	  k2.beginShape(LINES);
+	  k2.noFill();
+    k2.stroke(kickFontColor);
+    k2.strokeWeight((float)1.5);
+    k2.strokeJoin(ROUND);
+	  k2.vertex(displayWidth/95, (int)(displayHeight/25));
+	  k2.vertex(displayWidth/95, (int)(displayHeight/10));
+	  k2.endShape();
+	  k.addChild(k1);
+	  k.addChild(k2);
+	  colorMap.put(0, color(92, 190, 153));
+	  
+	  s = createShape(GROUP);// 37, 95
+	  PShape s1 = createShape(ARC, (float)(displayWidth/96), (float)(displayHeight/6.5), displayWidth/37, displayHeight/8, 0, PI+(QUARTER_PI), OPEN); 
+	  s1.setStroke(true);
+	  s1.setStroke(snareFontColor);
+	  s1.setStrokeWeight((float)1.5);
+	  s1.setFill(false);
+    s1.setStrokeJoin(ROUND);//26 25
+    PShape s2 = createShape(ARC, (float)(displayWidth/110), (float)(displayHeight/6.4), displayWidth/49, displayHeight/29, 0-(QUARTER_PI + QUARTER_PI/2), PI);
+    s2.setStroke(true);
+    s2.setStroke(snareFontColor);
+    s2.setStrokeWeight((float)1.5);
+    s2.setFill(false);
+    s2.setStrokeJoin(ROUND);
+    PShape s3 = createShape();
+    s3.beginShape(LINES);
+    s3.noFill();
+    s3.stroke(snareFontColor);
+    s3.strokeWeight((float)1.5);
+    s3.strokeJoin(ROUND);
+    s3.vertex(displayWidth/78, (int)(displayHeight/6.65));
+    s3.vertex(displayWidth/42, (int)(displayHeight/6.25));
+    s3.endShape();
+    s.addChild(s1);
+    s.addChild(s3);
+    s.addChild(s2);
+    colorMap.put(1, color(218, 125, 156));
 	  
 	  playPause = play;
 	  /*
@@ -499,8 +529,10 @@ public class DrumSeq extends PApplet {
     }
     cp5.draw();
     shape(playPause);
-    k.setStroke(kickFontColor);
+    k.setStroke(fontColors[0]);
     shape(k);
+    s.setStroke(fontColors[1]);
+    shape(s);
 	}
 	
   public void keyPressed() { //would be better as a switch statement?
