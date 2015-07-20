@@ -449,6 +449,7 @@ public class DrumSeq extends PApplet {
 
 	public void draw() {
 	  background(myColorBackground);
+	  //rectangle steps
 	  int x = displayWidth/28;
 	  for(int a = 0; a <colorSteps.length; a++){
 	    stroke(colorSteps[a]);
@@ -464,7 +465,7 @@ public class DrumSeq extends PApplet {
     rect(0, (int)(displayHeight/2.6), (int)(displayWidth/1.21), displayHeight/9, 5);
     
     //knob outlines
-    int elx = displayWidth/26;
+    float elx = (float)(displayWidth/25.95);
     int ely = displayHeight/29;
     for(int b = 0; b <kickKnobs[0].length; b++) {
       ellipseMode(CORNER);
@@ -472,7 +473,7 @@ public class DrumSeq extends PApplet {
       ellipse(elx, ely, (int)(displayHeight/17), (int)(displayHeight/17));
       elx += displayWidth/20;
     }
-    elx = displayWidth/26;
+    elx = (float)(displayWidth/25.95);
     ely = (int)(displayHeight/8.05);
     for(int b = 0; b <snareKnobs[0].length; b++) {
       ellipseMode(CORNER);
@@ -480,7 +481,7 @@ public class DrumSeq extends PApplet {
       ellipse(elx, ely, (int)(displayHeight/17), (int)(displayHeight/17));
       elx += displayWidth/20;
     }
-    elx = displayWidth/26;
+    elx = (float)(displayWidth/25.95);
     ely = (int)(displayHeight/4.67);
     for(int b = 0; b <snareKnobs[0].length; b++) {
       ellipseMode(CORNER);
@@ -488,7 +489,7 @@ public class DrumSeq extends PApplet {
       ellipse(elx, ely, (int)(displayHeight/17), (int)(displayHeight/17));
       elx += displayWidth/20;
     }
-    elx = displayWidth/26;
+    elx = (float)(displayWidth/25.95);
     ely = (int)(displayHeight/3.29);
     for(int b = 0; b <snareKnobs[0].length; b++) {
       ellipseMode(CORNER);
