@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import processing.core.PApplet;
+import processing.core.PFont;
 import processing.core.PShape;
 import controlP5.*;
 import beads.*;
@@ -14,8 +15,11 @@ import beads.*;
 /**
  * will we need a separate audiocontext for each drum if we want to output on separate channels?
  * add logger
+ * note: pfont doest seem to work very well, sticking with the pixelfont for now
+ * how custom tabs works is quite hacky, maybe we should switch to using cp5's snapshot/properties methods instead
  * fix: rectangle color problem, static final colors, tab issue using keyboard, knob valuelabel change using ctrl
- * ideas: keyboard, mute, clear, metronome, visuals,draw envelopes, 
+ * ideas: keyboard, mute, clear, metronome, visuals,draw envelopes, save presets, tap tempo, record
+ * for visuals look at controlp5 frame example
  * sculpt3dproject: how can the parameters be affected in a 2d plane before we look at 3d
  * @author tristan
  *
@@ -24,13 +28,16 @@ public class DrumSeq extends PApplet {
   //processing stuff
   int myColorBackground = color(30,30,30);
   //int myColorBackground = color(250,250,250);
+  PFont font;
   PShape play;
   PShape pause;
   PShape playPause;
   PShape k,s,h,t;
   int kickFontColor = color(255);
   int snareFontColor = color(255);
-  int[] fontColors = {kickFontColor, snareFontColor};
+  int hihatFontColor = color(255);
+  int tomFontColor = color(255);
+  int[] fontColors = {kickFontColor, snareFontColor, hihatFontColor, tomFontColor};
   HashMap<Integer,Integer> colorMap = new HashMap<Integer,Integer>();
   
   //cp5 stuff  
@@ -127,13 +134,13 @@ public class DrumSeq extends PApplet {
 	  k.addChild(k2);
 	  colorMap.put(0, color(92, 190, 153));
 	  
-	  s = createShape(GROUP);// 37, 95
+	  s = createShape(GROUP);
 	  PShape s1 = createShape(ARC, (float)(displayWidth/96), (float)(displayHeight/6.5), displayWidth/37, displayHeight/8, 0, PI+(QUARTER_PI), OPEN); 
 	  s1.setStroke(true);
 	  s1.setStroke(snareFontColor);
 	  s1.setStrokeWeight((float)1.5);
 	  s1.setFill(false);
-    s1.setStrokeJoin(ROUND);//26 25
+    s1.setStrokeJoin(ROUND);
     PShape s2 = createShape(ARC, (float)(displayWidth/110), (float)(displayHeight/6.4), displayWidth/49, displayHeight/29, 0-(QUARTER_PI + QUARTER_PI/2), PI);
     s2.setStroke(true);
     s2.setStroke(snareFontColor);
@@ -153,6 +160,34 @@ public class DrumSeq extends PApplet {
     s.addChild(s3);
     s.addChild(s2);
     colorMap.put(1, color(218, 125, 156));
+    
+    h = createShape();
+    h.beginShape(LINES);
+    h.noFill();
+    h.stroke(hihatFontColor);
+    h.strokeWeight((float)1.5);
+    h.strokeJoin(ROUND);
+    h.vertex(displayWidth/93, (int)(displayHeight/4.65));
+    h.vertex(displayWidth/93, (int)(displayHeight/3.6));
+    h.vertex(displayWidth/93, (int)(displayHeight/3.9));
+    h.vertex(displayWidth/36, (int)(displayHeight/3.9));
+    h.vertex(displayWidth/36, (int)(displayHeight/4.65));
+    h.vertex(displayWidth/36, (int)(displayHeight/3.6));
+    h.endShape();
+	  colorMap.put(2, color(117, 184, 201));
+	  
+	  t = createShape();
+	  t.beginShape(LINES);
+    t.noFill();
+    t.stroke(tomFontColor);
+    t.strokeWeight((float)1.5);
+    t.strokeJoin(ROUND);
+    t.vertex(displayWidth/93, (int)(displayHeight/3.25));
+    t.vertex(displayWidth/36, (int)(displayHeight/3.25));
+    t.vertex((int)(displayWidth/52.5), (int)(displayHeight/3.25));
+    t.vertex((int)(displayWidth/52.5), (int)(displayHeight/2.7));
+    t.endShape();
+    colorMap.put(3, color(212, 177, 70));
 	  
 	  playPause = play;
 	  /*
@@ -161,6 +196,8 @@ public class DrumSeq extends PApplet {
 	  
 	  cp5 = new ControlP5(this);
 	  cp5.setAutoDraw(false);
+	  //font = createFont("HelveticaNeue-Thin.vlw", 8, true);
+	  //cp5.setControlFont(font,8);
 	  
 	  /*
 	   * TABS
@@ -513,7 +550,7 @@ public class DrumSeq extends PApplet {
     }
     elx = (float)(displayWidth/25.95);
     ely = (int)(displayHeight/4.67);
-    for(int b = 0; b <snareKnobs[0].length; b++) {
+    for(int b = 0; b <hihatKnobs[0].length; b++) {
       ellipseMode(CORNER);
       stroke(color(117, 184, 201));
       ellipse(elx, ely, (int)(displayHeight/17), (int)(displayHeight/17));
@@ -521,7 +558,7 @@ public class DrumSeq extends PApplet {
     }
     elx = (float)(displayWidth/25.95);
     ely = (int)(displayHeight/3.29);
-    for(int b = 0; b <snareKnobs[0].length; b++) {
+    for(int b = 0; b <tomKnobs[0].length; b++) {
       ellipseMode(CORNER);
       stroke(color(212, 177, 70));
       ellipse(elx, ely, (int)(displayHeight/17), (int)(displayHeight/17));
@@ -533,6 +570,10 @@ public class DrumSeq extends PApplet {
     shape(k);
     s.setStroke(fontColors[1]);
     shape(s);
+    h.setStroke(fontColors[2]);
+    shape(h);
+    t.setStroke(fontColors[3]);
+    shape(t);
 	}
 	
   public void keyPressed() { //would be better as a switch statement?
