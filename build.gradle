@@ -46,6 +46,7 @@ dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
 
+//TODO should be changed to use gradle convention, using ant's resolve requires an internet connection
 task extractBeads(type: Copy) {
     String s = configurations.beads.resolve()
     s = s.replaceAll(~/[\[\]]/, "")
