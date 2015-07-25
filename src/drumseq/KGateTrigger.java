@@ -29,7 +29,7 @@ public class KGateTrigger extends Bead {
     KGateTrigger kg = (KGateTrigger) message;
     int step = kg.getId();
     parent.getKwp()[step].pause(true);
-    System.out.println("pauseNote: " + step);
+    //System.out.println("pauseNote: " + step);
     //once a note has been paused, a new delayTrigger is needed as it is killed after sending the message
     KGateTrigger kgate = new KGateTrigger(parent, step);
     //delay should never be smaller than 12 ms to be audible

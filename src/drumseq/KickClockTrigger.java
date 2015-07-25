@@ -23,7 +23,7 @@ public class KickClockTrigger extends Bead {
       long b = parent.getClock().getCount() % 16;
       for (int i = 0; i < 16; i++) {
         if (b == i) {
-          System.out.println("playNote: " + i);
+          //System.out.println("playNote: " + i);
           parent.getKwp()[i].pause(false);
         }
       }
