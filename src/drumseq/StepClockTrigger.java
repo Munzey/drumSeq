@@ -9,29 +9,25 @@ import beads.Bead;
  * @author tristan
  *
  */
-public class ClockTrigger extends Bead {
+public class StepClockTrigger extends Bead {
 
 	DrumSeq parent; // The parent PApplet that we will render ourselves onto
 
-	public ClockTrigger(PApplet p) {
+	public StepClockTrigger(PApplet p) {
 		super();
 		parent = (DrumSeq) p;
 	}
-
+//TODO change this so that each waveplayer is never paused, instead a pauseTrigger will be added to the waveplayer so that after a certain time(GATE) that wp is paused
 	protected void messageReceived(Bead message) {
-		//if (parent.switches[4].on) {
-			long b = parent.cl.getCount() % 16;
+			long b = parent.getClock().getCount() % 16;
 			for (int i = 0; i < 16; i++) {
 				if (b == i) {
-					parent.steps[i].toggle();
-					//parent.kwp[i].pause(false);
+					parent.getSteps()[i].toggle();
 				} else {
-				  if (parent.steps[i].getState()){
-				    parent.steps[i].toggle();
+				  if (parent.getSteps()[i].getState()){
+				    parent.getSteps()[i].toggle();
 				  }
-					//parent.kwp[i].pause(true);
 				}
 			}
-		//}
 	}
 }

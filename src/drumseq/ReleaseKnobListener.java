@@ -26,12 +26,12 @@ public class ReleaseKnobListener implements CallbackListener {
   @Override
   public void controlEvent(CallbackEvent theEvent) {
     char knobGroup = theEvent.getController().getName().charAt(0);
-    int groupIndex = java.util.Arrays.asList(parent.groups).indexOf(knobGroup);
+    int groupIndex = java.util.Arrays.asList(parent.getGroups()).indexOf(knobGroup);
     String knobType = theEvent.getController().getCaptionLabel().getText();
-    int index = java.util.Arrays.asList(parent.params).indexOf(knobType);
+    int index = java.util.Arrays.asList(parent.getParams()).indexOf(knobType);
     if (theEvent.getAction() == ControlP5.ACTION_RELEASED
         || theEvent.getAction() == ControlP5.ACTION_RELEASEDOUTSIDE) {
-      parent.knobContainer.get(groupIndex)[index][theEvent.getController()
+      parent.getKnobContainer().get(groupIndex)[index][theEvent.getController()
           .getId()].setValueLabel(Integer.toString(theEvent.getController()
           .getId() + 1));
     }

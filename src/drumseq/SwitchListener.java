@@ -18,28 +18,28 @@ public class SwitchListener implements ControlListener {
   
   @Override
   public void controlEvent(ControlEvent theEvent) {
-    // if play pause
+    // if play/pause button pressed
     if (theEvent.getId() == -1) {
       System.out.println("play/pause button pressed");
-      if (parent.playPauseTog.getState()) {
-        parent.playPause = parent.pause;
-        parent.ac.start();
+      if (parent.getPlayPauseTog().getState()) {
+        parent.setPlayPause(parent.getPause());
+        parent.getAc().start();
       }
       else {
-        parent.playPause = parent.play;
-        parent.ac.stop();
+        parent.setPlayPause(parent.getPlay());
+        parent.getAc().stop();
       }
     }
     else {
-      if (parent.steps[theEvent.getId()].getState()) {
-        parent.colorSteps[theEvent.getId()] = parent.color(198, 99, 99);
+      if (parent.getSteps()[theEvent.getId()].getState()) {
+        parent.getColorSteps()[theEvent.getId()] = parent.color(198, 99, 99);
       } else {
         if (theEvent.getId() == 0) {
-          parent.colorSteps[theEvent.getId()] = parent.color(113, 110, 110);
+          parent.getColorSteps()[theEvent.getId()] = parent.color(113, 110, 110);
         } else if (theEvent.getId() % 4 == 0) {
-          parent.colorSteps[theEvent.getId()] = parent.color(113, 110, 110);
+          parent.getColorSteps()[theEvent.getId()] = parent.color(113, 110, 110);
         } else {
-          parent.colorSteps[theEvent.getId()] = parent.color(42, 42, 42);
+          parent.getColorSteps()[theEvent.getId()] = parent.color(42, 42, 42);
         }
       }
     }
