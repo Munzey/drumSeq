@@ -32,25 +32,42 @@ repositories {
 }
 configurations {
     beads
+    jogl
+    gluegen
 }
 
 dependencies {
     beads group: 'net.beadsproject', name: 'Beads_Processing', ext: 'zip'
-    compile 'org.processing:core:2.2.1'
-    //will not run with processing see: https://github.com/quil/quil/issues/95
-    //compile 'org.jogamp.jogl:jogl-all-main:2.0.2'
-    //compile 'org.jogamp.gluegen:gluegen-rt-main:2.0.2'
-    //compile 'org.processing:processing-complete:3.0a10'
-    //NOTE: core declares processing-complete as its parent pom, so it will still try resolve complete and end up downloading from clojars 
-    //compile 'org.processing:core:3.0a10'
+    jogl 'org.jogamp.jogl:jogl-all:2.3.1',
+    //'org.jogamp.jogl:jogl-all:2.3.1:natives-android-aarch64',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-android-armv6',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-amd64',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6hf',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-i586',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-macosx-universal',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-amd64',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-solaris-i586',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-windows-amd64',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-windows-i586'
+          
+    gluegen 'org.jogamp.gluegen:gluegen-rt:2.3.1',
+    //'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-aarch64',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-armv6',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-amd64',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6hf',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-i586',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-macosx-universal',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-amd64',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-solaris-i586',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-amd64',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-windows-i586'
+             
+    compile 'org.processing:core:3.0a10'
     compile('controlp5:controlp5:2.2.4-SNAPSHOT') {
-        exclude group: 'quil', module: 'processing-core'
-        exclude group: 'quil', module: 'processing-pdf'
-        exclude group: 'quil', module: 'processing-dxf'
-        exclude group: 'quil', module: 'processing-js'
-        exclude group: 'org.clojure'
-        exclude group: 'com.lowagie'
-        //transitive = false
+        transitive = false
     }
     compile fileTree(dir: 'libs', include: ['*.jar'])
 }
@@ -66,6 +83,63 @@ task extractBeads(type: Copy) {
 	}
 	mapper(type:"flatten")
     }
+}
+
+task joglFatJar(type: Jar) {
+    //configurations.jogl.allArtifacts.getFiles.each { art ->
+    configurations.jogl.resolvedConfiguration.resolvedArtifacts.each { art ->
+        //could also use rename see: http://mrhaki.blogspot.ie/2010/10/gradle-goodness-renaming-files-while.html
+        from({ zipTree(art.getFile())}) {
+            include '**/*.so'
+            include '**/*.dll'
+            include '**/*.jnilib'
+            include 'jogamp/**/*'
+            include 'jogl/**/*'
+            include 'com/**/*'
+            include 'newt/**/*'
+          
+            eachFile { FileCopyDetails fcp ->
+                if (fcp.file.getName().matches(/.*\.(so|jnilib|dll)/)) {
+                    // remap the file
+                    String path = art.classifier.substring(8)
+                    String file = fcp.relativePath.segments[-1]
+                    fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), "natives/$path/$file")
+                }
+            }
+        }
+    }
+    baseName = 'jogl-all'
+    version = '2.3.1'
+    classifier = 'fat'
+    destinationDir = file('libs')
+}
+
+task gluegenFatJar(type: Jar) {
+    //configurations.jogl.allArtifacts.getFiles.each { art ->
+    configurations.gluegen.resolvedConfiguration.resolvedArtifacts.each { art ->
+        //could also use rename see: http://mrhaki.blogspot.ie/2010/10/gradle-goodness-renaming-files-while.html
+        from({ zipTree(art.getFile())}) {
+            include '**/*.so'
+            include '**/*.dll'
+            include '**/*.jnilib'
+            include 'jogamp/**/*'
+            include 'gluegen/**/*'
+            include 'com/**/*'
+          
+            eachFile { FileCopyDetails fcp ->
+                if (fcp.file.getName().matches(/.*\.(so|jnilib|dll)/)) {
+                    // remap the file
+                    String path = art.classifier.substring(8)
+                    String file = fcp.relativePath.segments[-1]
+                    fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), "natives/$path/$file")
+                }
+            }
+        }
+    }
+    baseName = 'gluegen-rt'
+    version = '2.3.1'
+    classifier = 'fat'
+    destinationDir = file('libs')
 }
 
 task wrapper(type: Wrapper) {

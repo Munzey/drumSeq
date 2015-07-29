@@ -82,11 +82,16 @@ public class DrumSeq extends PApplet {
   private float[] kAmp = {0.25f,0,0,0,0.25f,0,0,0,0.25f,0,0,0,0.25f,0,0,0};
   private float[] kGate = {100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100};
   private BetterBeadArray delayTriggers;
-  
+
+    public void settings() {
+      size(1138, 384, P2D);
+      smooth(8);
+    }
+    
 	public void setup() {
-	  size((int)(displayWidth/1.2), displayHeight/2, P2D);
-	  smooth(8);
-	  noStroke();
+      //size((int)(displayWidth/1.2), displayHeight/2, P2D);
+      //smooth(8);
+	  //noStroke();
 
 	  initialiseCP5GUI();
 	  drawLetters(); 
