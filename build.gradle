@@ -27,9 +27,10 @@ repositories {
 	}
     }
     flatDir {
-        dirs "$rootProject.projectDir/libs"
+        dirs libsDir
     }
 }
+
 configurations {
     beads
     jogl
@@ -39,7 +40,7 @@ configurations {
 dependencies {
     beads group: 'net.beadsproject', name: 'Beads_Processing', ext: 'zip'
     jogl 'org.jogamp.jogl:jogl-all:2.3.1',
-    //'org.jogamp.jogl:jogl-all:2.3.1:natives-android-aarch64',
+          'org.jogamp.jogl:jogl-all:2.3.1:natives-android-aarch64',
           'org.jogamp.jogl:jogl-all:2.3.1:natives-android-armv6',
           'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-amd64',
           'org.jogamp.jogl:jogl-all:2.3.1:natives-linux-armv6',
@@ -53,7 +54,7 @@ dependencies {
           'org.jogamp.jogl:jogl-all:2.3.1:natives-windows-i586'
           
     gluegen 'org.jogamp.gluegen:gluegen-rt:2.3.1',
-    //'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-aarch64',
+             'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-aarch64',
              'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-android-armv6',
              'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-amd64',
              'org.jogamp.gluegen:gluegen-rt:2.3.1:natives-linux-armv6',
@@ -69,7 +70,7 @@ dependencies {
     compile('controlp5:controlp5:2.2.4-SNAPSHOT') {
         transitive = false
     }
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(dir: libsDir, include: ['*.jar'])
 }
 
 //TODO should be changed to use gradle convention, using ant's resolve requires an internet connection
@@ -77,7 +78,7 @@ task extractBeads(type: Copy) {
     String s = configurations.beads.resolve()
     s = s.replaceAll(~/[\[\]]/, "")
      
-    ant.unzip(src: s, dest:'libs', overwrite:"true") {
+    ant.unzip(src: s, dest:libsDir, overwrite:"true") {
         patternset() {
 	    include( name: 'beads_processing/beads/library/*.jar' )
 	}
@@ -88,7 +89,6 @@ task extractBeads(type: Copy) {
 task joglFatJar(type: Jar) {
     //configurations.jogl.allArtifacts.getFiles.each { art ->
     configurations.jogl.resolvedConfiguration.resolvedArtifacts.each { art ->
-        //could also use rename see: http://mrhaki.blogspot.ie/2010/10/gradle-goodness-renaming-files-while.html
         from({ zipTree(art.getFile())}) {
             include '**/*.so'
             include '**/*.dll'
@@ -97,6 +97,7 @@ task joglFatJar(type: Jar) {
             include 'jogl/**/*'
             include 'com/**/*'
             include 'newt/**/*'
+            include 'META-INF/**/*'
           
             eachFile { FileCopyDetails fcp ->
                 if (fcp.file.getName().matches(/.*\.(so|jnilib|dll)/)) {
@@ -107,11 +108,29 @@ task joglFatJar(type: Jar) {
                 }
             }
         }
+        if (art.classifier.equals(null)) {
+            println("grabbing manifest")
+            project.ext.set("joglManif", zipTree(art.getFile()).matching {
+                include 'META-INF/**/*'
+                            }.getSingleFile())
+        }
     }
     baseName = 'jogl-all'
     version = '2.3.1'
     classifier = 'fat'
-    destinationDir = file('libs')
+    destinationDir = file("$buildDir/tmp")
+}
+
+task joglJar(type: Jar, dependsOn: "joglFatJar") {
+    description 'Adds the correct manfiest to the jogl fat jar.'
+    from zipTree(joglFatJar.archivePath) // add original content
+    baseName = 'jogl-all'
+    version = '2.3.1'
+    classifier = 'fat'
+    destinationDir = libsDir
+    manifest {
+        from(file(project.joglManif))
+    }
 }
 
 task gluegenFatJar(type: Jar) {
@@ -125,6 +144,7 @@ task gluegenFatJar(type: Jar) {
             include 'jogamp/**/*'
             include 'gluegen/**/*'
             include 'com/**/*'
+            include 'META-INF/**/*'
           
             eachFile { FileCopyDetails fcp ->
                 if (fcp.file.getName().matches(/.*\.(so|jnilib|dll)/)) {
@@ -134,12 +154,30 @@ task gluegenFatJar(type: Jar) {
                     fcp.relativePath = new RelativePath(!fcp.file.isDirectory(), "natives/$path/$file")
                 }
             }
+            if (art.classifier.equals(null)) {
+                println("grabbing manifest")
+                project.ext.set("gluegenManif", zipTree(art.getFile()).matching {
+                    include 'META-INF/**/*'
+                }.getSingleFile())
+            }
         }
     }
     baseName = 'gluegen-rt'
     version = '2.3.1'
     classifier = 'fat'
-    destinationDir = file('libs')
+    destinationDir = file("$buildDir/tmp")
+}
+
+task gluegenJar(type: Jar, dependsOn: "gluegenFatJar") {
+    description 'Adds the correct manfiest to the gluegen fat jar.'
+    from zipTree(gluegenFatJar.archivePath) // add original content
+    baseName = 'gluegen-rt'
+    version = '2.3.1'
+    classifier = 'fat'
+    destinationDir = libsDir
+    manifest {
+        from(file(project.gluegenManif))
+    }
 }
 
 task wrapper(type: Wrapper) {
