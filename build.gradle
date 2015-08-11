@@ -191,3 +191,5 @@ uploadArchives {
        }
     }
 }
+
+run.dependsOn joglJar, gluegenJar
