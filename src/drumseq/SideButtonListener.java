@@ -20,11 +20,13 @@ public class SideButtonListener implements ControlListener {
     System.out.println("side button pressed!");
     int selectedButton = theEvent.getId();
     if (parent.getButtons()[selectedButton].isOn()) {
+      parent.kTab.setVisible(true);
       parent.setPrevButEvent(theEvent.getId());
       parent.getFontColors()[selectedButton] = parent.getColorMap().get(selectedButton);
     }
     else {
       parent.getFontColors()[selectedButton] = parent.color(255);
+      parent.kTab.setVisible(false);
     }
     for (int i = 0; i < parent.getButtons().length; i++) {
       if (parent.getButtons()[i].isOn() && i != parent.getPrevButEvent()) {

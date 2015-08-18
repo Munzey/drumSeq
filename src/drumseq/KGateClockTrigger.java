@@ -8,7 +8,7 @@ import beads.UGen;
 
 
 /**
- * to create shuffle effect later on, will probably need a separate clock trigger for each instrument
+ * this works because delay triggers work the same as clock, i.e. calculateBuffer
  * @author Tristan
  *
  */

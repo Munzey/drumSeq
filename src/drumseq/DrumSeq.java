@@ -21,7 +21,7 @@ import beads.*;
  * note: pfont doest seem to work very well, sticking with the pixelfont for now
  * how custom tabs works is quite hacky, maybe we should switch to using cp5's snapshot/properties methods instead
  * fix: rectangle color problem, static final colors, tab issue using keyboard, knob valuelabel change using ctrl
- * ideas: keyboard, mute, clear, metronome, visuals,draw envelopes, save presets, tap tempo, record
+ * ideas: keyboard, mute, clear, metronome, visuals,draw envelopes, save presets, tap tempo, record, reverse pattern
  * for visuals look at controlp5 frame example
  * sculpt3dproject: how can the parameters be affected in a 2d plane before we look at 3d
  * @author Tristan Hamilton 
@@ -67,6 +67,8 @@ public class DrumSeq extends PApplet {
   private int prevButEvent;
   private int lastOnSideButton; //last known side button to be on, MAY NOT BE ON
   private HashMap<Integer,Integer> custMap = new HashMap<Integer,Integer>(); 
+  public RadioButton kickEnvRadio;
+  public NestedGroup kTab;
   
   //beads stuff
   private Clock clock;
@@ -80,8 +82,15 @@ public class DrumSeq extends PApplet {
   private int tempo = 2000; //default tempo 120
   private float masterVol = 0.025f;
   private float[] kAmp = {0.25f,0,0,0,0.25f,0,0,0,0.25f,0,0,0,0.25f,0,0,0};
-  private float[] kGate = {100,100,100,100,100,100,100,100,100,100,100,100,100,100,100,100};
+  private float[] kGate = {600,600,600,600,600,600,600,600,600,600,600,600,600,600,600,600};
   private BetterBeadArray delayTriggers;
+  public float kAttack = 0f;
+  public float kDecay = 50f;
+  public float kSustain = .5f;
+  public float kSustainLen = 0f;
+  public float kRelease = 400f;
+  public Envelope[] kGainEnv = new Envelope[16];
+  public Gain[] kGain = new Gain[16];
   
 	public void setup() {
 	  size((int)(displayWidth/1.2), displayHeight/2, P2D);
@@ -217,6 +226,90 @@ public class DrumSeq extends PApplet {
       cp5.getController(drum).moveTo("global");
       z++;
     }
+    
+    /*
+     * KICK ENV TAB 
+     */
+    kTab = new NestedGroup();
+
+    Group kEnv0 = cp5.addGroup("kEnv0")
+                     .moveTo("global")
+                     ;
+    kTab.add(kEnv0);
+    
+    Group kEnv1 = cp5.addGroup("kEnv1")
+                     .moveTo("global")
+                     ;
+    
+    kTab.add(kEnv1);
+    
+    Group kRad = cp5.addGroup("kRad")
+                      .moveTo("global")
+                      ;
+
+    kTab.add(kRad);
+    
+    kickEnvRadio = cp5.addRadioButton("kickEnvRadio")
+        .setNoneSelectedAllowed(false)
+        .addItem("amp", 0)
+        .addItem("pitch", 1)
+        .setPosition(150, 300)
+        .setGroup(kRad)
+        .activate(0)
+        ;
+    
+    cp5.addSlider("A")
+       .setSize(5, 60)
+       .setPosition(200, 300)
+       .setColorValueLabel(color(30,30,30))
+       .setGroup(kEnv0)
+       .setRange(0, 1000f)
+       .setValue(kAttack)
+       .addListener(new EnvelopeListener(this))
+       .setId(1)
+       ;
+    cp5.addSlider("D")
+       .setSize(5, 60)
+       .setPosition(215, 300)
+       .setColorValueLabel(color(30,30,30))
+       .setGroup(kEnv0)
+       .setRange(0, 1000f)
+       .setValue(kDecay)
+       .addListener(new EnvelopeListener(this))
+       .setId(2)
+       ;
+    cp5.addSlider("S")
+       .setSize(5, 60)
+       .setPosition(230, 300)
+       .setColorValueLabel(color(30,30,30))
+       .setGroup(kEnv0)
+       .setRange(0, 1f)
+       .setValue(kSustain)
+       .addListener(new EnvelopeListener(this))
+       .setId(3)
+       ;
+    cp5.addSlider("S.L")
+      .setSize(5, 60)
+      .setPosition(245, 300)
+      .setColorValueLabel(color(30,30,30))
+      .setGroup(kEnv0)
+      .setRange(0, 1000f)
+      .setValue(kSustainLen)
+      .addListener(new EnvelopeListener(this))
+      .setId(4)
+    ;
+    cp5.addSlider("R")
+       .setSize(5, 60)
+       .setPosition(260, 300)
+       .setColorValueLabel(color(30,30,30))
+       .setGroup(kEnv0)
+       .setRange(0, 1000f)
+       .setValue(kRelease)
+       .addListener(new EnvelopeListener(this))
+       .setId(5)
+    ;
+    kTab.setVisible(false);
+    
     /*
      * CREATE PARAM KNOBS
      */
@@ -592,17 +685,34 @@ public class DrumSeq extends PApplet {
     
     
     // oscillators/waveplayers
-    //TODO add a gain to each kwp and then route them all to the master gain
+    //TODO add a gain env to each kwp and then route them all to the master gain
+
     for (int i =0; i<16; i++){
       // could we create a mode to glide from the previous note up?
       kickPitchGlides[i] = new Glide(ac, Pitch.mtof(60), 50);
       kwp[i] = new WavePlayer(ac, kickPitchGlides[i], Buffer.SQUARE);
       kwp[i].pause(true);
       kGainGl[i] = new Glide(ac, kAmp[i] , 50);
+      kGainEnv[i] = new Envelope(ac,0);
+      //Gain env = new Gain(ac, 1, kGainEnv);
+      //env.addInput(kwp[i]);
+      kGain[i] = new Gain(ac, 1);
+      kGain[i].addInput(kwp[i]);
+      kGain[i].setGain(kGainEnv[i]);
+      Gain temp = new Gain(ac, 1, kGainGl[i]);
+      temp.addInput(kGain[i]);
+      sc.addInput(temp);
+      //kGainEnv[i].addSegment(0.5f, kAttack);
+      /*
       Gain temp = new Gain(ac, 1, kGainGl[i]);
       temp.addInput(kwp[i]);
-      sc.addInput(temp);
+      Gain env = new Gain(ac, 1, kGainEnv);
+      env.addInput(temp);
+      //sc.addInput(temp);
+      sc.addInput(env);
+      */
     }
+    //kGainEnv.addSegment(0.5f, kAttack);
     //Master-gain
     gainGl = new Glide(ac, masterVol, 50);
     masterGain = new Gain(ac, 1, gainGl);
@@ -824,6 +934,11 @@ public class DrumSeq extends PApplet {
             k.moveTo("cust");
           }
         }
+	    }
+	  }
+	  else  if (theControlEvent.isFrom(kickEnvRadio)) {
+	    for (int i=0; i<kickEnvRadio.getArrayValue().length; i++) {
+	      cp5.getGroup("kEnv"+i).setVisible(i==kickEnvRadio.getValue());
 	    }
 	  }
 	}
